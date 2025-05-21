@@ -81,8 +81,11 @@
           const img = document.createElement("img");
           img.src = `작업내용 사진/${filename}`;
           img.alt = filename;
-          img.style.width = "480px";
+          img.style.width = "100%";
+          img.style.maxWidth = "640px";
           img.style.height = "auto";
+          img.style.display = "block";
+          img.style.margin = "0 auto 12px auto";
           img.style.borderRadius = "10px";
           img.style.boxShadow = "0 2px 8px rgba(60,110,213,0.10)";
           galleryDiv.appendChild(img);
