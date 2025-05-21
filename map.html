@@ -57,7 +57,10 @@
     const map = new kakao.maps.Map(container, options);
     const geocoder = new kakao.maps.services.Geocoder();
 
-    // 같은 위치(좌표)에 여러 데이터가 모이도록 그룹핑
+    // 팝업(커스텀오버레이) 닫기용 변수
+    let currentOverlay = null;
+
+    // 좌표 그룹핑: 같은 위치(주소)는 하나로 묶되, 맞춤번호(작업순서)는 배열로 저장
     function groupByAddress(data) {
       const addressMap = {};
       data.forEach(row => {
@@ -71,8 +74,40 @@
       return addressMap;
     }
 
-    // 팝업(커스텀오버레이) 닫기용 변수
-    let currentOverlay = null;
+    // 라벨 클릭 이벤트 등록 (좌표, label, info, address)
+    window.labelClicked = function (coordsStr, label, info, address) {
+      // 기존 오버레이 닫기
+      if (currentOverlay) currentOverlay.setMap(null);
+
+      // 팝업창 HTML (배경색, X버튼, 정보, 길찾기)
+      const popupHtml = `
+        <div style="position:relative; background:#fff9db; border-radius:10px; padding:16px 20px 10px 12px; min-width:210px; max-width:320px; font-size:15px; box-shadow:2px 2px 14px rgba(0,0,0,0.10); border:1.5px solid #bbb;">
+          <span onclick="window.closePopup()" style="
+            position:absolute; right:12px; top:10px; font-weight:bold; cursor:pointer; font-size:17px; color:#888;">✖</span>
+          <div style="margin-bottom:8px;"><b>주소:</b> ${address}</div>
+          <div style="margin-bottom:6px;"><b>맞춤번호:</b> ${label}</div>
+          <div style="margin-bottom:12px;"><b>비고:</b> ${info ? info : '-'}</div>
+          <a href="https://map.kakao.com/?eName=${encodeURIComponent(address)}" target="_blank">
+            <button>길찾기</button>
+          </a>
+        </div>
+      `;
+      const coords = coordsStr.split(',').map(Number);
+      currentOverlay = new kakao.maps.CustomOverlay({
+        position: new kakao.maps.LatLng(coords[0], coords[1]),
+        content: popupHtml,
+        yAnchor: 1.2
+      });
+      currentOverlay.setMap(map);
+
+      window.closePopup = function() {
+        if (currentOverlay) currentOverlay.setMap(null);
+        currentOverlay = null;
+      };
+    };
+
+    // 지도 모든 위치 LatLngBounds로 확대/이동
+    let bounds = new kakao.maps.LatLngBounds();
 
     Papa.parse("data/작업주소.csv", {
       download: true,
@@ -84,71 +119,37 @@
           geocoder.addressSearch(address, function (result, status) {
             if (status === kakao.maps.services.Status.OK) {
               const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+              bounds.extend(coords);
+
               const group = addressGroups[address];
-
-              // 첫 번째 맞춤번호만 표시(중복될 경우 여러 개 찍으면 지저분하니까)
-              const mainLabel = group[0].label;
-
-              // 1. 숫자(라벨)만 지도에 표시, 클릭 가능하게 처리
-              const labelOverlay = new kakao.maps.CustomOverlay({
-                position: coords,
-                content: `
-                  <div class="custom-marker-label" style="
-                    background:#ffec4b;
-                    border-radius:50%;
-                    width:32px;height:32px;
+              // 여러 맞춤번호가 있으면 모두 옆으로 붙이기!
+              let labelHtml = '<div style="display:flex;gap:6px;">';
+              group.forEach(item => {
+                // 라벨 클릭 시 각 맞춤번호/상세가 따로 팝업 뜸!
+                labelHtml += `
+                  <div style="
+                    background:#ffec4b; border-radius:50%; width:32px;height:32px;
                     display:flex;align-items:center;justify-content:center;
                     font-size:17px;font-weight:bold;
                     border:2px solid #333;
                     color:#222; cursor:pointer;
                     box-shadow:1px 1px 4px rgba(0,0,0,0.12);
-                    " onclick="window.labelClicked('${address.replace(/'/g, "\\'")}')"
-                    >${mainLabel}</div>`,
+                    margin-right:0;"
+                    onclick="window.labelClicked('${coords.getLat()},${coords.getLng()}', '${item.label}', \`${item.info ? item.info.replace(/`/g, "\\`") : ""}\`, '${address.replace(/'/g, "\\'")}')"
+                  >${item.label}</div>`;
+              });
+              labelHtml += '</div>';
+
+              // 오버레이 생성(여러 라벨)
+              const labelOverlay = new kakao.maps.CustomOverlay({
+                position: coords,
+                content: labelHtml,
                 yAnchor: 0.85
               });
               labelOverlay.setMap(map);
-
-              // 2. 커스텀오버레이(팝업) 만들기
-              window.labelClicked = function(clickedAddress) {
-                // 기존 오버레이 닫기
-                if (currentOverlay) currentOverlay.setMap(null);
-
-                // 팝업에 같은 주소의 모든 맞춤번호/비고 한 번에 보여줌
-                const groupData = addressGroups[clickedAddress];
-                let detailHtml = '';
-                groupData.forEach(item => {
-                  detailHtml += `
-                    <div style="margin-bottom:8px;">
-                      <b>맞춤번호:</b> ${item.label}<br>
-                      <b>비고:</b> ${item.info ? item.info : '-'}
-                    </div>`;
-                });
-                // 팝업창 HTML (X 버튼, 주소, 상세, 길찾기)
-                const popupHtml = `
-                  <div style="position:relative;padding:12px 16px 8px 10px;min-width:200px;max-width:300px;font-size:15px;">
-                    <span onclick="window.closePopup()" style="
-                      position:absolute;right:8px;top:8px;font-weight:bold;cursor:pointer;font-size:16px;">✖</span>
-                    <div style="margin-bottom:8px;"><b>주소:</b> ${clickedAddress}</div>
-                    ${detailHtml}
-                    <a href="https://map.kakao.com/?eName=${encodeURIComponent(clickedAddress)}" target="_blank">
-                      <button>길찾기</button>
-                    </a>
-                  </div>
-                `;
-                currentOverlay = new kakao.maps.CustomOverlay({
-                  position: coords,
-                  content: popupHtml,
-                  yAnchor: 1.2
-                });
-                currentOverlay.setMap(map);
-
-                // 팝업 닫기 함수 바인딩 (window.closePopup에서 currentOverlay 닫음)
-                window.closePopup = function() {
-                  if (currentOverlay) currentOverlay.setMap(null);
-                  currentOverlay = null;
-                };
-              };
             }
+            // 위치 좌표 끝나고 나서 fitBounds
+            map.setBounds(bounds);
           });
         });
       }
