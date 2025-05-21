@@ -2,230 +2,200 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>나라이엔지 작업현황</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=eb47ba5aac6adcee49680ecf6d6c9197&libraries=services"></script>
+  <title>작업 위치 지도</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background: #f8fafd;
-      margin: 0; padding: 0;
-      text-align: center;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    .title {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-top: 24px;
-      margin-bottom: 16px;
-      letter-spacing: 2px;
-      color: #32428b;
+    body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background: #fafbfc;}
+    .main-title {
+      text-align: center; font-size: 2.2em; font-weight: bold;
+      margin-top: 24px; margin-bottom: 18px;
+      color: #1d3c7b; letter-spacing: 2px;
     }
     nav {
-      background: #4a74d2;
-      padding: 12px 0;
-      margin-bottom: 20px;
+      background-color: #3c6ed5; padding: 10px; margin-bottom: 8px;
     }
     nav ul {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      list-style: none;
-      padding: 0; margin: 0;
-      flex-wrap: wrap;
+      list-style: none; display: flex !important;
+      justify-content: center; margin: 0; padding: 0;
+      gap: 10px; flex-wrap: wrap;
     }
+    nav li { margin: 0; }
     nav a {
-      color: #fff;
-      background: #3451a1;
-      padding: 10px 18px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: 500;
-      transition: background 0.2s;
-      display: block;
+      color: white; text-decoration: none; padding: 10px 14px;
+      display: block; border-radius: 5px;
+      background-color: #2c54a3; font-size: 15px;
     }
-    nav a:hover { background: #638cf4; }
-    h2 {
-      font-size: 1.5rem;
-      margin: 30px 0 18px 0;
-      font-weight: bold;
-      letter-spacing: 1px;
+    nav a:hover { background-color: #4a7ded; }
+    .center-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      margin: 0 auto; max-width: 700px; min-width: 0; padding: 0 12px;
     }
-    #map {
-      width: 100%;
-      max-width: 760px;
-      height: 400px;
-      margin: 0 auto 30px auto;
-      border: 2px solid #c6d0e1;
-      border-radius: 12px;
-      background: #eef1f7;
-    }
-    #address-table-container {
-      margin: 0 auto;
-      max-width: 760px;
-      margin-bottom: 40px;
-    }
+    h1, h2, h3 { text-align: center; }
+    #map { width: 100%; height: 600px; margin-top: 20px; border: 1px solid #ccc; }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 16px;
-      margin-top: 10px;
-      box-shadow: 0 2px 8px #dde4ed40;
+      margin: 18px auto; border-collapse: collapse; width: 98%; max-width: 540px;
+      background: white; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 2px 16px rgba(60,110,213,0.07);
     }
     th, td {
-      padding: 8px 4px;
-      border-bottom: 1px solid #e1e5ef;
-      text-align: center;
+      border: 1px solid #d6dbe6;
+      padding: 8px 8px; text-align: center; font-size: 1em;
     }
     th {
-      background: #4a74d2;
-      color: #fff;
+      background: #f2f6ff;
       font-weight: bold;
     }
-    tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: #f7faff; }
     @media (max-width: 700px) {
-      .container, #map, #address-table-container, table { max-width: 100vw; }
-      #map { height: 350px; }
-      .title { font-size: 1.4rem; }
-      h2 { font-size: 1.1rem; }
-      table { font-size: 14px; }
+      .main-title { font-size: 1.4em; margin-top: 16px; }
+      .center-wrap { max-width: 100vw; padding: 0 2vw; }
+      #map { height: 350px !important; }
+      nav a { font-size: 13px; padding: 8px 9px; }
+      table, th, td { font-size: 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="title">나라이엔지 작업현황</div>
-    <nav>
-      <ul>
-        <li><a href="index.html">작업내용</a></li>
-        <li><a href="location.html">작업주소</a></li>
-        <li><a href="caution.html">주의사항</a></li>
-        <li><a href="map.html">지도보기</a></li>
-      </ul>
-    </nav>
-
-    <h2>작업 위치 지도</h2>
+  <div class="main-title">나라이엔지 작업현황</div>
+  <nav>
+    <ul>
+      <li><a href="index.html">작업내용</a></li>
+      <li><a href="location.html">작업주소</a></li>
+      <li><a href="caution.html">주의사항</a></li>
+      <li><a href="map.html">지도보기</a></li>
+    </ul>
+  </nav>
+  <div class="center-wrap">
+    <h1 style="text-align:center; margin:0 0 18px 0; font-size: 1.45em;">작업 위치 지도</h1>
     <div id="map"></div>
-
-    <div id="address-table-container">
-      <table id="address-table">
-        <thead>
-          <tr>
-            <th>맞춤번호</th>
-            <th>주소</th>
-            <th>비고</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <table id="address-table" style="margin-top:20px;">
+      <thead>
+        <tr>
+          <th>맞춤번호</th>
+          <th>주소</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=eb47ba5aac6adcee49680ecf6d6c9197&libraries=services"></script>
   <script>
-    // 지도 초기화
-    let map;
-    let geocoder;
-    window.onload = function () {
-      map = new kakao.maps.Map(document.getElementById('map'), {
-        center: new kakao.maps.LatLng(35.336, 129.038),
-        level: 6
+    const container = document.getElementById('map');
+    const options = {
+      center: new kakao.maps.LatLng(35.336, 129.038),
+      level: 6
+    };
+    const map = new kakao.maps.Map(container, options);
+    const geocoder = new kakao.maps.services.Geocoder();
+    let currentOverlay = null;
+    let bounds = new kakao.maps.LatLngBounds();
+
+    function groupByAddress(data) {
+      const addressMap = {};
+      data.forEach(row => {
+        const address = row["주소"];
+        const info = row["비고"];
+        let label = row["맞춤번호"];
+        if (!label || label.trim() === "") label = "N";
+        if (!addressMap[address]) addressMap[address] = [];
+        addressMap[address].push({ label, info, address });
       });
-      geocoder = new kakao.maps.services.Geocoder();
+      return addressMap;
+    }
 
-      Papa.parse("data/작업주소.csv", {
-        download: true,
-        header: true,
-        complete: function (results) {
-          // 지도 마커는 변환 성공한 주소만!
-          results.data.forEach(row => {
-            const address = row["주소"];
-            const info = row["비고"] || "";
-            const label = row["맞춤번호"] || "N";
-            if (address && label) {
-              geocoder.addressSearch(address, function (result, status) {
-                if (status === kakao.maps.services.Status.OK) {
-                  const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+    // 라벨 클릭 이벤트
+    window.labelClicked = function (coordsStr, label, info, address) {
+      if (currentOverlay) currentOverlay.setMap(null);
+      const popupHtml = `
+        <div style="position:relative; background:#fff9db; border-radius:10px; padding:16px 20px 10px 12px; min-width:210px; max-width:320px; font-size:15px; box-shadow:2px 2px 14px rgba(0,0,0,0.10); border:1.5px solid #bbb;">
+          <span onclick="window.closePopup()" style="position:absolute; right:12px; top:10px; font-weight:bold; cursor:pointer; font-size:17px; color:#888;">✖</span>
+          <div style="margin-bottom:8px;"><b>주소:</b> ${address}</div>
+          <div style="margin-bottom:6px;"><b>맞춤번호:</b> ${label}</div>
+          <div style="margin-bottom:12px;"><b>비고:</b> ${info ? info : '-'}</div>
+          <a href="https://map.kakao.com/?eName=${encodeURIComponent(address)}" target="_blank">
+            <button>길찾기</button>
+          </a>
+        </div>
+      `;
+      const coords = coordsStr.split(',').map(Number);
+      currentOverlay = new kakao.maps.CustomOverlay({
+        position: new kakao.maps.LatLng(coords[0], coords[1]),
+        content: popupHtml,
+        yAnchor: 1.2
+      });
+      currentOverlay.setMap(map);
+      window.closePopup = function() {
+        if (currentOverlay) currentOverlay.setMap(null);
+        currentOverlay = null;
+      };
+    };
 
-                  // 숫자 원형 마커 커스텀 오버레이 (기본 마커 대신)
-                  const content = `
-                    <div style="
-                      background:#f3f6fb;
-                      color:#253271;
-                      border:2px solid #4a74d2;
-                      border-radius: 50%;
-                      width:38px; height:38px;
-                      line-height:38px;
-                      font-weight:bold;
-                      font-size:17px;
-                      text-align:center;
-                      box-shadow: 1px 3px 10px #aac1e61c;
-                      ">
-                      ${label}
-                    </div>
-                  `;
-                  const overlay = new kakao.maps.CustomOverlay({
-                    content: content,
-                    position: coords,
-                    yAnchor: 0.5,
-                  });
+    // 주소목록 테이블에 데이터 표시 함수
+    function updateAddressTable(rows) {
+      const tbody = document.getElementById('address-table').querySelector('tbody');
+      tbody.innerHTML = "";
+      // 맞춤번호 오름차순 정렬, 없으면 "N"이 뒤로
+      rows.sort((a, b) => {
+        if (a.label === "N") return 1;
+        if (b.label === "N") return -1;
+        return Number(a.label) - Number(b.label);
+      });
+      rows.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${item.label}</td><td>${item.address}</td><td>${item.info || ""}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
 
-                  overlay.setMap(map);
+    // 데이터 처리 및 지도/라벨/테이블 그리기
+    Papa.parse("data/작업주소.csv", {
+      download: true,
+      header: true,
+      complete: function (results) {
+        const addressGroups = groupByAddress(results.data);
+        let allRows = [];
 
-                  // 클릭시 팝업(InfoWindow)
-                  const infowindow = new kakao.maps.InfoWindow({
-                    content: `
-                      <div style="background:#fff; padding:12px 10px 10px 10px; border-radius:8px; min-width:180px; min-height:40px; font-size:15px; box-shadow:0 3px 15px #aaa4;">
-                        <b>맞춤번호:</b> ${label}<br>
-                        <b>주소:</b> ${address}<br>
-                        <b>비고:</b> ${info}<br>
-                        <a href="https://map.kakao.com/?eName=${encodeURIComponent(address)}" target="_blank">
-                          <button style="margin-top:6px; background:#4a74d2;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;">길찾기</button>
-                        </a>
-                      </div>
-                    `,
-                  });
+        Object.keys(addressGroups).forEach(address => {
+          geocoder.addressSearch(address, function (result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+              const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+              bounds.extend(coords);
 
-                  kakao.maps.event.addListener(overlay, 'click', function () {
-                    infowindow.setPosition(coords);
-                    infowindow.open(map);
-                  });
-                }
+              const group = addressGroups[address];
+              // 숫자라벨 여러개를 가로로 표시
+              let labelHtml = '<div style="display:flex;gap:6px;">';
+              group.forEach(item => {
+                labelHtml += `
+                  <div style="
+                    background:#ffec4b; border-radius:50%; width:32px;height:32px;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:17px;font-weight:bold;
+                    border:2px solid #333;
+                    color:#222; cursor:pointer;
+                    box-shadow:1px 1px 4px rgba(0,0,0,0.12);
+                    margin-right:0;"
+                    onclick="window.labelClicked('${coords.getLat()},${coords.getLng()}', '${item.label}', \`${item.info ? item.info.replace(/`/g, "\\`") : ""}\`, '${address.replace(/'/g, "\\'")}')"
+                  >${item.label}</div>`;
+                allRows.push(item); // 주소목록에도 추가
               });
+              labelHtml += '</div>';
+
+              const labelOverlay = new kakao.maps.CustomOverlay({
+                position: coords,
+                content: labelHtml,
+                yAnchor: 0.85
+              });
+              labelOverlay.setMap(map);
+
+              map.setBounds(bounds); // fitBounds
+              updateAddressTable(allRows); // 테이블도 같이 업데이트
             }
           });
-
-          // ----- 지도 아래 표 -----
-          // 맞춤번호 오름차순 정렬
-          const sorted = results.data.slice().sort((a, b) => {
-            // 숫자가 아닌 경우(N 등)는 999로 취급하여 맨 뒤로
-            const numA = Number(a["맞춤번호"]) || 999;
-            const numB = Number(b["맞춤번호"]) || 999;
-            return numA - numB;
-          });
-          // 표 내용
-          let tbodyHTML = "";
-          sorted.forEach(row => {
-            tbodyHTML += `
-              <tr>
-                <td>${row["맞춤번호"] || "N"}</td>
-                <td>${row["주소"] || ""}</td>
-                <td>${row["비고"] || ""}</td>
-              </tr>
-            `;
-          });
-          document.querySelector("#address-table tbody").innerHTML = tbodyHTML;
-        }
-      });
-    };
+        });
+      }
+    });
   </script>
 </body>
 </html>
