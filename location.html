@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>작업 주소 목록</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    body { font-family: 'Arial', sans-serif; padding: 2rem; background-color: #f2f2f2; }
+    h1 { font-size: 24px; margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; background-color: #fff; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #eee; }
+  </style>
+</head>
+<body>
+  <h1>작업 위치 주소 목록</h1>
+  <table>
+    <thead>
+      <tr><th>번호</th><th>주소</th><th>비고</th></tr>
+    </thead>
+    <tbody id="address-table"></tbody>
+  </table>
+  <script>
+    Papa.parse("data/작업주소.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        const data = results.data;
+        const tableBody = document.getElementById("address-table");
+        data.forEach(row => {
+          if (row["번호"] && row["주소"] && row["비고"]) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${row["번호"]}</td><td>${row["주소"]}</td><td>${row["비고"]}</td>`;
+            tableBody.appendChild(tr);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
