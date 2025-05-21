@@ -52,13 +52,13 @@
     // 1. 지도 기본 생성
     const container = document.getElementById('map');
     const options = {
-      center: new kakao.maps.LatLng(35.336, 129.038), // 기본 중심 좌표 (예: 양산시)
+      center: new kakao.maps.LatLng(35.336, 129.038), // 기본 중심 좌표 (양산시)
       level: 6
     };
     const map = new kakao.maps.Map(container, options);
     const geocoder = new kakao.maps.services.Geocoder();
 
-    // 2. CSV 파일 파싱해서 마커 찍기
+    // 2. CSV 파일 파싱해서 마커 및 숫자라벨 표시
     Papa.parse("data/작업주소.csv", {
       download: true,
       header: true,
@@ -72,12 +72,32 @@
             geocoder.addressSearch(address, function (result, status) {
               if (status === kakao.maps.services.Status.OK) {
                 const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                // 1) 기본 마커 생성
                 const marker = new kakao.maps.Marker({
                   map: map,
                   position: coords,
                   title: label.toString()
                 });
 
+                // 2) 숫자라벨(커스텀오버레이) 생성
+                const numberLabel = new kakao.maps.CustomOverlay({
+                  position: coords,
+                  content: `<div style="
+                    background:#ffec4b;
+                    border-radius:50%;
+                    width:32px;height:32px;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:17px;font-weight:bold;
+                    border:2px solid #333;
+                    color:#222;
+                    box-shadow:1px 1px 4px rgba(0,0,0,0.12);
+                    "">${label}</div>`,
+                  yAnchor: 0.85 // 마커 위에 숫자 위치
+                });
+                numberLabel.setMap(map);
+
+                // 3) 마커 클릭 시 정보창
                 const infowindow = new kakao.maps.InfoWindow({
                   content: `
                     <div style="padding:5px;font-size:14px;">
