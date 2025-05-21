@@ -4,123 +4,105 @@
   <meta charset="UTF-8">
   <title>작업 위치 지도</title>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=eb47ba5aac6adcee49680ecf6d6c9197&libraries=services"></script>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=eb47ba5aac6adcee49680ecf6d6c9197&libraries=services&autoload=false"></script>
   <style>
     body { font-family: 'Arial', sans-serif; padding: 2rem; }
     h1 { font-size: 24px; }
     #map { width: 100%; height: 600px; margin-top: 20px; border: 1px solid #ccc; }
-    .infowin-content { font-size: 14px; padding: 5px; }
-    .infowin-content button {
-      margin-top: 5px;
-      padding: 5px 10px;
-      font-size: 13px;
-      background: #3c6ed5;
+    nav {
+      background-color: #3c6ed5;
+      padding: 10px;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    nav li {
+      margin: 0;
+    }
+    nav a {
       color: white;
-      border: none;
+      text-decoration: none;
+      padding: 10px 14px;
+      display: block;
       border-radius: 5px;
-      cursor: pointer;
+      background-color: #2c54a3;
+      font-size: 15px;
+    }
+    nav a:hover {
+      background-color: #4a7ded;
     }
   </style>
 </head>
 <body>
-
-<nav>
-  <ul>
-    <li><a href="index.html">작업내용</a></li>
-    <li><a href="location.html">작업주소</a></li>
-    <li><a href="caution.html">주의사항</a></li>
-    <li><a href="map.html">지도보기</a></li>
-  </ul>
-</nav>
-<style>
-  nav {
-    background-color: #3c6ed5;
-    padding: 10px;
-  }
-  nav ul {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    margin: 0;
-    padding: 0;
-  }
-  nav li {
-    margin: 5px 0;
-  }
-  nav a {
-    color: white;
-    text-decoration: none;
-    padding: 8px 12px;
-    display: block;
-    border-radius: 5px;
-    background-color: #2c54a3;
-  }
-  nav a:hover {
-    background-color: #4a7ded;
-  }
-
-  @media (max-width: 600px) {
-    nav ul {
-      flex-direction: column;
-      align-items: center;
-    }
-  }
-</style>
+  <nav>
+    <ul>
+      <li><a href="index.html">작업내용</a></li>
+      <li><a href="location.html">작업주소</a></li>
+      <li><a href="caution.html">주의사항</a></li>
+      <li><a href="map.html">지도보기</a></li>
+    </ul>
+  </nav>
 
   <h1>작업 위치 지도</h1>
   <div id="map"></div>
 
   <script>
-    const mapContainer = document.getElementById('map');
-    const mapOption = {
-      center: new kakao.maps.LatLng(35.336, 129.038),
-      level: 6
-    };
-    const map = new kakao.maps.Map(mapContainer, mapOption);
-    const geocoder = new kakao.maps.services.Geocoder();
+    kakao.maps.load(function() {
+      const mapContainer = document.getElementById('map');
+      const mapOption = {
+        center: new kakao.maps.LatLng(35.336, 129.038),
+        level: 6
+      };
+      const map = new kakao.maps.Map(mapContainer, mapOption);
+      const geocoder = new kakao.maps.services.Geocoder();
 
-    Papa.parse("data/작업주소.csv", {
-      download: true,
-      header: true,
-      complete: function(results) {
-        results.data.forEach(row => {
-          const address = row["주소"];
-          const info = row["비고"];
-          const label = row["맞춤번호"];
+      Papa.parse("data/작업주소.csv", {
+        download: true,
+        header: true,
+        complete: function(results) {
+          results.data.forEach(row => {
+            const address = row["주소"];
+            const info = row["비고"];
+            const label = row["맞춤번호"];
 
-          if (address && label) {
-            geocoder.addressSearch(address, function(result, status) {
-              if (status === kakao.maps.services.Status.OK) {
-                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            if (address && label) {
+              geocoder.addressSearch(address, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                  const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                  const marker = new kakao.maps.Marker({
+                    map: map,
+                    position: coords,
+                    title: label.toString()
+                  });
 
-                const marker = new kakao.maps.Marker({
-                  map: map,
-                  position: coords,
-                  title: label.toString()
-                });
+                  const infowindow = new kakao.maps.InfoWindow({
+                    content: `
+                      <div style="padding:5px;font-size:14px;">
+                        <strong>맞춤번호:</strong> ${label}<br>
+                        <strong>주소:</strong> ${address}<br>
+                        <strong>비고:</strong> ${info}<br>
+                        <a href="https://map.kakao.com/?eName=${encodeURIComponent(address)}" target="_blank">
+                          <button>길찾기</button>
+                        </a>
+                      </div>
+                    `
+                  });
 
-                const infowindow = new kakao.maps.InfoWindow({
-                  content: `
-                    <div class="infowin-content">
-                      <strong>맞춤번호:</strong> ${label}<br>
-                      <strong>주소:</strong> ${address}<br>
-                      <strong>비고:</strong> ${info}<br>
-                      <a href="https://map.kakao.com/?eName=${encodeURIComponent(address)}" target="_blank">
-                        <button>길찾기</button>
-                      </a>
-                    </div>
-                  `
-                });
-
-                kakao.maps.event.addListener(marker, 'click', function() {
-                  infowindow.open(map, marker);
-                });
-              }
-            });
-          }
-        });
-      }
+                  kakao.maps.event.addListener(marker, 'click', function() {
+                    infowindow.open(map, marker);
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
     });
   </script>
 </body>
