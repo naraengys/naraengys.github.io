@@ -55,8 +55,8 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
-    // 1. 주의사항 텍스트 출력
-    Papa.parse("data/작업시주의사항.csv", {
+    // 1. 주의사항 텍스트 출력 (CSV 파일명 영어로)
+    Papa.parse("data/work_caution.csv", {
       download: true,
       complete: function(results) {
         const rows = results.data;
@@ -73,8 +73,8 @@
       }
     });
 
-    // 2. 이미지 갤러리 자동 출력 (img에 직접 스타일 부여)
-    fetch('작업시주의사항 사진/image_list.json')
+    // 2. 이미지 갤러리 자동 출력 (폴더명 영어로)
+    fetch('work_caution_pic/image_list.json')
       .then(response => response.json())
       .then(imageList => {
         const galleryDiv = document.getElementById("gallery");
@@ -87,10 +87,9 @@
 
         imageList.forEach(filename => {
           const img = document.createElement("img");
-          img.src = `작업시주의사항 사진/${filename}`;
+          img.src = `work_caution_pic/${filename}`;
           img.alt = filename;
 
-          // 여기서 스타일 직접 부여!
           img.style.width = "100%";
           img.style.maxWidth = "640px";
           img.style.height = "auto";
