@@ -168,7 +168,7 @@ window.labelClicked = function (coordsStr, label, info, address) {
     }
 
     // ★★★ 핵심! 수정된 데이터 처리 부분 ★★★
-    Papa.parse("data/작업주소.csv", {
+    Papa.parse("data/work_address.csv", {  // ← 여기가 바뀐 부분!
       download: true,
       header: true,
       complete: function (results) {
