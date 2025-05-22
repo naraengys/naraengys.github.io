@@ -92,7 +92,6 @@
     let currentOverlay = null;
     let bounds = new kakao.maps.LatLngBounds();
 
-    // 주소별로 그룹화 함수(기존과 동일)
     function groupByAddress(data) {
       const addressMap = {};
       data.forEach(row => {
@@ -106,55 +105,50 @@
       return addressMap;
     }
 
-    // 팝업 라벨 클릭 이벤트
-window.labelClicked = function (coordsStr, label, info, address) {
-  if (currentOverlay) currentOverlay.setMap(null);
+    window.labelClicked = function (coordsStr, label, info, address) {
+      if (currentOverlay) currentOverlay.setMap(null);
 
-  const isMobile = window.innerWidth <= 700;
-  const mobileLink = `kakaomap://route?ep=${encodeURIComponent(address)}`;
-  const webLink = `https://map.kakao.com/?eName=${encodeURIComponent(address)}`;
+      const isMobile = window.innerWidth <= 700;
+      const mobileLink = `kakaomap://route?ep=${encodeURIComponent(address)}`;
+      const webLink = `https://map.kakao.com/?eName=${encodeURIComponent(address)}`;
 
-  const popupHtml = `
-    <div style="position:relative; background:#fff9db; border-radius:10px; padding:16px 20px 10px 12px; min-width:210px; max-width:320px; font-size:15px; box-shadow:2px 2px 14px rgba(0,0,0,0.10); border:1.5px solid #bbb;">
-      <span onclick="window.closePopup()" style="position:absolute; right:12px; top:10px; font-weight:bold; cursor:pointer; font-size:17px; color:#888;">✖</span>
-      <div style="margin-bottom:8px; display:flex; align-items:center;">
-        <b style="margin-right:5px;">주소:</b> 
-        <span style="flex:1;">${address}</span>
-        <button style="margin-left:6px; font-size:13px; padding:3px 8px; border-radius:5px; border:1px solid #c0c0c0; background:#fffbe3; cursor:pointer;"
-          onclick="navigator.clipboard.writeText('${address}').then(()=>{alert('주소가 복사되었습니다!');}); event.stopPropagation();">
-          복사
-        </button>
-      </div>
-      <div style="margin-bottom:6px;"><b>맞춤번호:</b> ${label}</div>
-      <div style="margin-bottom:12px;"><b>비고:</b> ${info ? info : '-'}</div>
-      <div style="font-size:13px; color:#e76b00; margin-bottom:7px;">
-        <b>스마트폰은 주소복사 필수</b>
-      </div>
-      <a href="${isMobile ? mobileLink : webLink}" target="_blank">
-        <button>길찾기</button>
-      </a>
-    </div>
-  `;
-  const coords = coordsStr.split(',').map(Number);
-  currentOverlay = new kakao.maps.CustomOverlay({
-    position: new kakao.maps.LatLng(coords[0], coords[1]),
-    content: popupHtml,
-    yAnchor: 1.2
-  });
-  currentOverlay.setMap(map);
-  window.closePopup = function() {
-    if (currentOverlay) currentOverlay.setMap(null);
-    currentOverlay = null;
-  };
-};
+      const popupHtml = `
+        <div style="position:relative; background:#fff9db; border-radius:10px; padding:16px 20px 10px 12px; min-width:210px; max-width:320px; font-size:15px; box-shadow:2px 2px 14px rgba(0,0,0,0.10); border:1.5px solid #bbb;">
+          <span onclick="window.closePopup()" style="position:absolute; right:12px; top:10px; font-weight:bold; cursor:pointer; font-size:17px; color:#888;">✖</span>
+          <div style="margin-bottom:8px; display:flex; align-items:center;">
+            <b style="margin-right:5px;">주소:</b> 
+            <span style="flex:1;">${address}</span>
+            <button style="margin-left:6px; font-size:13px; padding:3px 8px; border-radius:5px; border:1px solid #c0c0c0; background:#fffbe3; cursor:pointer;"
+              onclick="navigator.clipboard.writeText('${address}').then(()=>{alert('주소가 복사되었습니다!');}); event.stopPropagation();">
+              복사
+            </button>
+          </div>
+          <div style="margin-bottom:6px;"><b>맞춤번호:</b> ${label}</div>
+          <div style="margin-bottom:12px;"><b>비고:</b> ${info ? info : '-'}</div>
+          <div style="font-size:13px; color:#e76b00; margin-bottom:7px;">
+            <b>스마트폰은 주소복사 필수</b>
+          </div>
+          <a href="${isMobile ? mobileLink : webLink}" target="_blank">
+            <button>길찾기</button>
+          </a>
+        </div>
+      `;
+      const coords = coordsStr.split(',').map(Number);
+      currentOverlay = new kakao.maps.CustomOverlay({
+        position: new kakao.maps.LatLng(coords[0], coords[1]),
+        content: popupHtml,
+        yAnchor: 1.2
+      });
+      currentOverlay.setMap(map);
+      window.closePopup = function() {
+        if (currentOverlay) currentOverlay.setMap(null);
+        currentOverlay = null;
+      };
+    };
 
-
-
-    // 테이블 그리기 함수 (기존과 동일)
     function updateAddressTable(rows) {
       const tbody = document.getElementById('address-table').querySelector('tbody');
       tbody.innerHTML = "";
-      // 맞춤번호 오름차순 정렬, 없으면 "N"이 뒤로
       rows.sort((a, b) => {
         if (a.label === "N") return 1;
         if (b.label === "N") return -1;
@@ -167,25 +161,22 @@ window.labelClicked = function (coordsStr, label, info, address) {
       });
     }
 
-    // ★★★ 핵심! 수정된 데이터 처리 부분 ★★★
-    Papa.parse("data/work_address.csv", {  // ← 여기가 바뀐 부분!
+    // CSV 파일명만 영어로 바꾼 부분
+    Papa.parse("data/work_address.csv", {
       download: true,
       header: true,
       complete: function (results) {
         const addressGroups = groupByAddress(results.data);
         let allRows = [];
 
-        // 1. 모든 주소 데이터를 allRows에 넣음 (지도 표시 여부와 상관없이)
         Object.keys(addressGroups).forEach(address => {
           addressGroups[address].forEach(item => {
             allRows.push(item);
           });
         });
 
-        // 2. 테이블을 먼저 그림 (항상 모든 데이터 표시!)
         updateAddressTable(allRows);
 
-        // 3. 지도 마커는 정상 주소만 표시 (기존 코드와 동일)
         Object.keys(addressGroups).forEach(address => {
           geocoder.addressSearch(address, function (result, status) {
             if (status === kakao.maps.services.Status.OK) {
@@ -220,6 +211,38 @@ window.labelClicked = function (coordsStr, label, info, address) {
         });
       }
     });
+
+    // ----- 여기가 내 위치 실시간 빨간점 표시 기능 (스마트폰에서만) -----
+    if (window.innerWidth <= 700 && navigator.geolocation) {
+      let myCircle = null;
+
+      navigator.geolocation.watchPosition(function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        var locPosition = new kakao.maps.LatLng(lat, lng);
+
+        // 기존 빨간 점 삭제
+        if (myCircle) {
+          myCircle.setMap(null);
+        }
+        // 빨간 점(원) 생성
+        myCircle = new kakao.maps.Circle({
+          center: locPosition,
+          radius: 25,
+          strokeWeight: 3,
+          strokeColor: '#ff3333',
+          strokeOpacity: 0.8,
+          strokeStyle: 'solid',
+          fillColor: '#ff3333',
+          fillOpacity: 0.6
+        });
+        myCircle.setMap(map);
+
+        // 지도 중심은 그대로!
+      }, function(error) {
+        console.log("위치정보를 가져올 수 없습니다.", error);
+      });
+    }
   </script>
 </body>
 </html>
