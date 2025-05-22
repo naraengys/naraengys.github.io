@@ -54,7 +54,8 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
-    Papa.parse("data/작업내용.csv", {
+    // CSV 파일명만 영어로 변경
+    Papa.parse("data/work_content.csv", {
       download: true,
       complete: function(results) {
         const title = results.data[0][0];
@@ -64,8 +65,8 @@
       }
     });
 
-    // 이미지 리스트를 불러와서 갤러리로 보여주기
-    fetch('작업내용 사진/image_list.json')
+    // 이미지 폴더명만 영어로 변경
+    fetch('work_content_pic/image_list.json')
       .then(response => response.json())
       .then(imageList => {
         const contentDiv = document.getElementById("content");
@@ -79,7 +80,7 @@
         imageList.forEach(filename => {
           // 이미지 태그 생성
           const img = document.createElement("img");
-          img.src = `작업내용 사진/${filename}`;
+          img.src = `work_content_pic/${filename}`;
           img.alt = filename;
           img.style.width = "100%";
           img.style.maxWidth = "640px";
