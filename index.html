@@ -56,14 +56,26 @@
   <script>
     // CSV 파일명만 영어로 변경
     Papa.parse("data/work_content.csv", {
-      download: true,
-      complete: function(results) {
+    download: true,
+    complete: function(results) {
+        // 타이틀 (1번째 줄)
         const title = results.data[0][0];
-        const content = results.data[1][0];
+
+        // 2번째 줄부터 마지막 줄까지 내용을 모두 합침
+        let content = '';
+        for (let i = 1; i < results.data.length; i++) {
+            // 공백 줄(빈 배열)이면 제외
+            if (results.data[i].length > 0 && results.data[i][0].trim() !== '') {
+                content += results.data[i][0] + "<br>"; // 줄바꿈(HTML)
+            }
+        }
+
         document.getElementById("title").innerText = title;
-        document.getElementById("content").innerText = content;
+        document.getElementById("content").innerHTML = content; // innerHTML로!
+
       }
-    });
+  });
+
 
     // 이미지 폴더명만 영어로 변경
     fetch('work_content_pic/image_list.json')
